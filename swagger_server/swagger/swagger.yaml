@@ -1,0 +1,370 @@
+openapi: 3.0.3
+info:
+  title: Back End Assessment - OpenAPI 3.0
+  description: |-
+    This is my back end assessment based on the OpenAPI 3.0 specification.  You can find out more about
+    Swagger at [https://swagger.io](https://swagger.io).
+
+    Some useful links:
+    - [My Back End Assessment repository](https://github.com/batkins2/backend_assessment)
+  contact:
+    email: batkins2@gmail.com
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+- url: https://localhost/api/
+tags:
+- name: signup
+  description: Sign up for an account
+- name: login
+  description: Log into an account
+- name: create
+  description: Create note
+- name: read
+  description: Access to notes
+- name: update
+  description: Update note
+- name: delete
+  description: Delete note
+- name: search
+  description: Search for a note
+- name: share
+  description: Share a note
+paths:
+  /auth/signup:
+    post:
+      tags:
+      - signup
+      summary: Sign up for an account
+      description: Sign up for an account
+      operationId: sign_up
+      requestBody:
+        description: Sign up for an account
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Validation exception
+      x-openapi-router-controller: swagger_server.controllers.signup_controller
+  /auth/login:
+    post:
+      tags:
+      - login
+      summary: log into an account
+      description: Log into an account
+      operationId: login
+      requestBody:
+        description: Log into an account
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Validation exception
+      x-openapi-router-controller: swagger_server.controllers.login_controller
+  /create:
+    post:
+      tags:
+      - create
+      summary: Create a note
+      description: Create a note
+      operationId: create_note
+      requestBody:
+        description: Create a note
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Note'
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        "422":
+          description: Validation exception
+      security:
+      - notes_auth:
+        - write:notes
+        - read:notes
+      x-openapi-router-controller: swagger_server.controllers.create_controller
+  /read/{note_id}:
+    get:
+      tags:
+      - read
+      summary: Get note by id
+      description: Get note by id
+      operationId: get_note
+      parameters:
+      - name: note_id
+        in: path
+        description: Id for note
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Note'
+                x-content-type: application/json
+        "400":
+          description: Invalid id value
+      security:
+      - notes_auth:
+        - write:notes
+        - read:notes
+      x-openapi-router-controller: swagger_server.controllers.read_controller
+  /update/{note_id}:
+    put:
+      tags:
+      - update
+      summary: Update note by id
+      description: Update note by id.
+      operationId: update_note
+      parameters:
+      - name: note_id
+        in: path
+        description: Id of note to update.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Note'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Note'
+                x-content-type: application/json
+        "400":
+          description: Invalid id value
+      security:
+      - notes_auth:
+        - write:notes
+        - read:notes
+      x-openapi-router-controller: swagger_server.controllers.update_controller
+  /delete/{note_id}:
+    delete:
+      tags:
+      - delete
+      summary: Delete note by id
+      description: Delete note by id.
+      operationId: delete_note
+      parameters:
+      - name: note_id
+        in: path
+        description: Id of note to update.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Note'
+                x-content-type: application/json
+        "400":
+          description: Invalid id value
+      security:
+      - notes_auth:
+        - write:notes
+        - read:notes
+      x-openapi-router-controller: swagger_server.controllers.delete_controller
+  /search:
+    post:
+      tags:
+      - search
+      summary: Search notes by text
+      description: Search notes by text.
+      operationId: search_notes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Note'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Note'
+                x-content-type: application/json
+        "400":
+          description: Invalid id value
+      security:
+      - notes_auth:
+        - write:notes
+        - read:notes
+      x-openapi-router-controller: swagger_server.controllers.search_controller
+  /share/{note_id}/{user_id}:
+    put:
+      tags:
+      - share
+      summary: Share note by id to user by id
+      description: Share note by id to user by id.
+      operationId: share_note
+      parameters:
+      - name: note_id
+        in: path
+        description: Id of note to share.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      - name: user_id
+        in: path
+        description: Id of user to send note.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+        "400":
+          description: Invalid id value
+      security:
+      - notes_auth:
+        - write:notes
+        - read:notes
+      x-openapi-router-controller: swagger_server.controllers.share_controller
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        username:
+          type: string
+          example: theUser
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: James
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: "12345"
+        phone:
+          type: string
+          example: "12345"
+        userStatus:
+          type: integer
+          description: User Status
+          format: int32
+          example: 1
+      xml:
+        name: user
+    Note:
+      required:
+      - name
+      - note
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          example: work
+        note:
+          type: string
+          example: get that api working
+      example:
+        name: work
+        id: 10
+        note: get that api working
+      xml:
+        name: note
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+      xml:
+        name: '##default'
+  requestBodies:
+    Note:
+      description: Note object that needs to be added to the store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Note'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Note'
+    UserArray:
+      description: List of user object
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+  securitySchemes:
+    notes_auth:
+      type: apiKey
+      name: api_key
+      in: header
+      x-apikeyInfoFunc: swagger_server.controllers.authorization_controller.check_api_key
+
